@@ -147,6 +147,7 @@
         margin: 0 10px;
         max-width: 120px;
         user-select: none;
+        touch-action: manipulation;
       }
     }
   </style>
@@ -202,6 +203,7 @@
     let progress = 0;
     let lastKey = '';
     let gameOver = false;
+    let lastTapTime = 0;
 
     const faces = ["😬", "😠", "😤", "😫", "😵‍💫", "😎", "😌"];
     const messages = [
@@ -245,7 +247,10 @@
     function handlePress(key) {
       if (gameOver) return;
 
-      // 🔔 Telefon rezgés
+      const now = Date.now();
+      if (now - lastTapTime < 80) return; // Debounce: 80ms
+      lastTapTime = now;
+
       if (navigator.vibrate) {
         navigator.vibrate(100);
       }
