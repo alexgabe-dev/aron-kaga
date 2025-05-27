@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <title>Áron a WC-n kagál</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: linear-gradient(#e0f7fa, #b2dfdb);
+      font-family: "Comic Sans MS", sans-serif;
+      text-align: center;
+      padding: 30px;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      color: #3e2723;
+    }
+
+    .game-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 20px auto;
+    }
+
+    #aron {
+      font-size: 100px;
+      transition: transform 0.1s ease;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    #smoke, #sweat {
+      font-size: 40px;
+      position: absolute;
+      display: none;
+    }
+
+    #smoke { left: 70%; top: 20%; }
+    #sweat { right: 70%; top: 20%; }
+
+    #message {
+      font-size: 1.3em;
+      margin: 10px;
+      height: 2em;
+    }
+
+    .progress-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .action {
+      font-size: 2em;
+      width: 40px;
+      text-align: center;
+      margin: 0 10px;
+      opacity: 0.2;
+      transition: all 0.2s ease;
+      font-weight: bold;
+      color: #4e342e;
+    }
+
+    .action.active {
+      transform: scale(1.5);
+      color: #ff5722;
+      opacity: 1;
+    }
+
+    #progressContainer {
+      width: 200px;
+      height: 30px;
+      background: #cfd8dc;
+      margin: 20px auto;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: inset 0 0 10px #00000033;
+      position: relative;
+    }
+
+    #progress {
+      height: 100%;
+      width: 0%;
+      background: #6d4c41;
+      transition: width 0.1s ease;
+    }
+
+    #instructions {
+      font-size: 1.2em;
+      margin: 20px;
+    }
+
+    #result {
+      font-size: 2em;
+      color: green;
+      margin-top: 30px;
+    }
+
+    #retryBtn {
+      display: none;
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 18px;
+      background: #8bc34a;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .mobile-controls {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-controls {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        position: fixed;
+        bottom: 20px;
+        left: 0;
+        padding: 0 20px;
+        box-sizing: border-box;
+        z-index: 10;
+      }
+
+      .mobile-btn {
+        padding: 16px 20px;
+        font-size: 20px;
+        border: none;
+        border-radius: 15px;
+        background: #ffab91;
+        color: #4e342e;
+        font-weight: bold;
+        flex: 1;
+        margin: 0 10px;
+        max-width: 120px;
+        user-select: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>💩 Áron a WC-n kagál</h1>
+
+  <div class="game-container">
+    <div id="aron">🚽😬</div>
+    <div id="smoke">💨</div>
+    <div id="sweat">💦</div>
+  </div>
+
+  <div id="message">Nyom meg az A és D gombkat hogy segits Áronnak.</div>
+
+  <div class="progress-wrapper">
+    <div id="leftAction" class="action">A</div>
+    <div id="progressContainer"><div id="progress"></div></div>
+    <div id="rightAction" class="action">D</div>
+  </div>
+
+  <div id="instructions">Ha hibázol, Áron visszacsúszik!</div>
+  <div id="result"></div>
+  <button id="retryBtn" onclick="location.reload()">Újra próbálom 💪</button>
+
+  <!-- Mobilgombok -->
+  <div class="mobile-controls" id="mobileControls">
+    <button class="mobile-btn" id="touchA">A</button>
+    <button class="mobile-btn" id="touchD">D</button>
+  </div>
+
+  <!-- Hangok -->
+  <audio id="poopSound" src="https://www.soundjay.com/human/fart-01.mp3" preload="auto"></audio>
+  <audio id="gruntSound" src="https://www.soundjay.com/bathroom/toilet-seat-down-1.mp3" preload="auto"></audio>
+  <audio id="tapSound" src="https://www.soundjay.com/buttons/button-22.mp3" preload="auto"></audio>
+
+  <script>
+    const aron = document.getElementById('aron');
+    const message = document.getElementById('message');
+    const progressBar = document.getElementById('progress');
+    const result = document.getElementById('result');
+    const poopSound = document.getElementById('poopSound');
+    const gruntSound = document.getElementById('gruntSound');
+    const tapSound = document.getElementById('tapSound');
+    const smoke = document.getElementById('smoke');
+    const sweat = document.getElementById('sweat');
+    const retryBtn = document.getElementById('retryBtn');
+    const leftAction = document.getElementById('leftAction');
+    const rightAction = document.getElementById('rightAction');
+    const mobileControls = document.getElementById('mobileControls');
+
+    let progress = 0;
+    let lastKey = '';
+    let gameOver = false;
+
+    const faces = ["😬", "😠", "😤", "😫", "😵‍💫", "😎", "😌"];
+    const messages = [
+      "Ez most kemény...",
+      "Gyerünk Áron, toljad!",
+      "Majdnem megvan!",
+      "Csak még egy kicsit!",
+      "NYOMJAD!! 💢",
+    ];
+
+    function updateGame() {
+      progress = Math.min(100, progress);
+      progressBar.style.width = progress + "%";
+
+      if (progress >= 100) {
+        aron.textContent = "🚽" + faces[6];
+      } else if (progress >= 80) {
+        aron.textContent = "🚽" + faces[4];
+      } else if (progress >= 50) {
+        aron.textContent = "🚽" + faces[2];
+      } else {
+        aron.textContent = "🚽" + faces[0];
+      }
+
+      if (progress > 60) {
+        smoke.style.display = 'block';
+        sweat.style.display = 'block';
+      }
+
+      if (progress >= 100 && !gameOver) {
+        gameOver = true;
+        poopSound.play();
+        message.textContent = '';
+        result.innerHTML = "Áron végre megkönnyebbült! 💩💨";
+        retryBtn.style.display = 'inline-block';
+        mobileControls.style.display = 'none'; // eltűnnek a mobilgombok
+      }
+    }
+
+    function handlePress(key) {
+      if (gameOver) return;
+
+      tapSound.currentTime = 0;
+      tapSound.play();
+
+      gruntSound.currentTime = 0;
+      gruntSound.play();
+
+      if (key === 'A') {
+        leftAction.classList.add('active');
+        setTimeout(() => leftAction.classList.remove('active'), 150);
+      } else {
+        rightAction.classList.add('active');
+        setTimeout(() => rightAction.classList.remove('active'), 150);
+      }
+
+      if ((key === 'A' && lastKey !== 'A') || (key === 'D' && lastKey !== 'D')) {
+        lastKey = key;
+        progress += 4 + Math.random() * 2;
+        message.textContent = messages[Math.floor(Math.random() * messages.length)];
+        aron.style.transform = `translate(-50%, -50%) scale(${1 + Math.random() * 0.1}) rotate(${(Math.random() - 0.5) * 10}deg)`;
+      } else {
+        progress -= 5;
+        message.textContent = "Áron visszacsúszott! 😱";
+      }
+
+      updateGame();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const key = e.key.toUpperCase();
+      if (key === 'A' || key === 'D') {
+        handlePress(key);
+      }
+    });
+
+    document.getElementById('touchA').addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      handlePress('A');
+    });
+
+    document.getElementById('touchD').addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      handlePress('D');
+    });
+
+    setInterval(() => {
+      if (!gameOver) {
+        aron.style.transform = 'translate(-50%, -50%) scale(1) rotate(0deg)';
+      }
+    }, 150);
+  </script>
+</body>
+</html>
