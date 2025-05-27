@@ -59,6 +59,7 @@
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
+      will-change: transform;
     }
 
     #smoke, #sweat {
@@ -176,10 +177,11 @@
     }
 
     .floating-emoji {
-      position: absolute;
+      position: fixed;
       font-size: clamp(26px, 8vw, 40px);
       animation: floatUp 1s ease-out forwards;
       pointer-events: none;
+      z-index: 999;
     }
 
     @keyframes floatUp {
@@ -258,9 +260,11 @@
       const emoji = document.createElement("div");
       emoji.className = "floating-emoji";
       emoji.textContent = floatingEmojis[Math.floor(Math.random() * floatingEmojis.length)];
+
       const rect = target.getBoundingClientRect();
-      emoji.style.left = rect.left + rect.width / 2 + "px";
-      emoji.style.top = rect.top + window.scrollY + "px";
+      emoji.style.left = `${rect.left + rect.width / 2}px`;
+      emoji.style.top = `${rect.top}px`;
+
       document.body.appendChild(emoji);
       setTimeout(() => document.body.removeChild(emoji), 1000);
     }
