@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>Áron a WC-n kagál</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       background: linear-gradient(#e0f7fa, #b2dfdb);
-      font-family: "Comic Sans MS", sans-serif;
+      font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
       text-align: center;
-      padding: 30px;
+      padding: 30px 20px 80px;
       min-height: 100vh;
       margin: 0;
       display: flex;
@@ -25,13 +28,13 @@
 
     .game-container {
       position: relative;
-      width: 200px;
-      height: 200px;
+      width: min(80vw, 300px);
+      height: min(80vw, 300px);
       margin: 20px auto;
     }
 
     #aron {
-      font-size: 100px;
+      font-size: clamp(60px, 20vw, 100px);
       transition: transform 0.1s ease;
       position: absolute;
       left: 50%;
@@ -125,28 +128,28 @@
 
     @media (max-width: 768px) {
       .mobile-controls {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
         position: fixed;
-        bottom: 20px;
+        bottom: 0;
         left: 0;
-        padding: 0 20px;
-        box-sizing: border-box;
+        right: 0;
+        padding: 10px 10px 20px;
+        display: flex;
+        justify-content: space-around;
+        gap: 20px;
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(5px);
         z-index: 10;
       }
 
       .mobile-btn {
-        padding: 16px 20px;
-        font-size: 20px;
+        padding: 16px;
+        font-size: clamp(20px, 6vw, 28px);
         border: none;
-        border-radius: 15px;
+        border-radius: 20px;
         background: #ffab91;
         color: #4e342e;
         font-weight: bold;
         flex: 1;
-        margin: 0 10px;
-        max-width: 120px;
         user-select: none;
         touch-action: manipulation;
         transition: transform 0.1s ease;
@@ -242,7 +245,7 @@
       emoji.textContent = floatingEmojis[Math.floor(Math.random() * floatingEmojis.length)];
       const rect = target.getBoundingClientRect();
       emoji.style.left = rect.left + rect.width / 2 + "px";
-      emoji.style.top = rect.top + "px";
+      emoji.style.top = rect.top + window.scrollY + "px";
       document.body.appendChild(emoji);
       setTimeout(() => document.body.removeChild(emoji), 1000);
     }
@@ -275,8 +278,7 @@
         poopSound.play();
         const time = ((Date.now() - startTime) / 1000).toFixed(2);
         message.textContent = '';
-        result.innerHTML = `Áron végre megkönnyebbült! 💩💨<br><br>
-                            Idő: <strong>${time}</strong> mp`;
+        result.innerHTML = `Áron végre megkönnyebbült! <br>💩💨<br><br>Idő: <strong>${time}</strong> mp`;
         retryBtn.style.display = 'inline-block';
         document.getElementById('mobileControls').style.display = 'none';
         instructions.style.display = 'none';
@@ -285,7 +287,6 @@
 
     function handlePress(key, btnElement = null) {
       if (gameOver) return;
-
       const now = Date.now();
       if (now - lastTapTime < 80) return;
       lastTapTime = now;
