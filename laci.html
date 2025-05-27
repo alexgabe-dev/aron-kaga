@@ -160,7 +160,7 @@
     <div id="sweat">💦</div>
   </div>
 
-  <div id="message">Nyom meg az A és D gombkat hogy segits Áronnak.</div>
+  <div id="message">Nyoomd meg az A / D gombot hogy segits Áronnak!</div>
 
   <div class="progress-wrapper">
     <div id="leftAction" class="action">A</div>
@@ -197,6 +197,7 @@
     const leftAction = document.getElementById('leftAction');
     const rightAction = document.getElementById('rightAction');
     const mobileControls = document.getElementById('mobileControls');
+    const instructions = document.getElementById('instructions');
 
     let progress = 0;
     let lastKey = '';
@@ -236,12 +237,18 @@
         message.textContent = '';
         result.innerHTML = "Áron végre megkönnyebbült! 💩💨";
         retryBtn.style.display = 'inline-block';
-        mobileControls.style.display = 'none'; // eltűnnek a mobilgombok
+        mobileControls.style.display = 'none';
+        instructions.style.display = 'none';
       }
     }
 
     function handlePress(key) {
       if (gameOver) return;
+
+      // 🔔 Telefon rezgés
+      if (navigator.vibrate) {
+        navigator.vibrate(100);
+      }
 
       tapSound.currentTime = 0;
       tapSound.play();
