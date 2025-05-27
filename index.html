@@ -180,7 +180,7 @@
 
   <!-- Hangok -->
   <audio id="poopSound" src="https://www.soundjay.com/human/fart-01.mp3" preload="auto"></audio>
-  <audio id="gruntSound" src="https://www.soundjay.com/bathroom/toilet-seat-down-1.mp3" preload="auto"></audio>
+  <audio id="gruntSound" src="https://www.soundjay.com/human/burp-1.mp3" preload="auto"></audio>
   <audio id="tapSound" src="https://www.soundjay.com/buttons/button-22.mp3" preload="auto"></audio>
 
   <script>
@@ -250,16 +250,14 @@
         navigator.vibrate(100);
       }
 
-      tapSound.currentTime = 0;
-      tapSound.play();
-
-      gruntSound.currentTime = 0;
-      gruntSound.play();
-
       if (key === 'A') {
+        const tapClone = tapSound.cloneNode();
+        tapClone.play();
         leftAction.classList.add('active');
         setTimeout(() => leftAction.classList.remove('active'), 150);
-      } else {
+      } else if (key === 'D') {
+        const gruntClone = gruntSound.cloneNode();
+        gruntClone.play();
         rightAction.classList.add('active');
         setTimeout(() => rightAction.classList.remove('active'), 150);
       }
