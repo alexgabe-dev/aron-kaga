@@ -15,6 +15,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      overflow-x: hidden;
     }
 
     h1 {
@@ -149,12 +150,25 @@
         user-select: none;
         touch-action: manipulation;
         transition: transform 0.1s ease;
+        position: relative;
       }
 
       .mobile-btn.pressed {
         transform: scale(0.92);
         box-shadow: inset 0 3px 6px rgba(0,0,0,0.2);
       }
+    }
+
+    .floating-emoji {
+      position: absolute;
+      font-size: 24px;
+      animation: floatUp 1s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-50px); opacity: 0; }
     }
   </style>
 </head>
@@ -179,13 +193,11 @@
   <div id="result"></div>
   <button id="retryBtn" onclick="location.reload()">Újra próbálom 💪</button>
 
-  <!-- Mobilgombok -->
   <div class="mobile-controls" id="mobileControls">
     <button class="mobile-btn" id="touchA">A</button>
     <button class="mobile-btn" id="touchD">D</button>
   </div>
 
-  <!-- Hangok -->
   <audio id="poopSound" src="https://www.soundjay.com/human/fart-01.mp3" preload="auto"></audio>
   <audio id="gruntSound" src="https://www.soundjay.com/human/burp-1.mp3" preload="auto"></audio>
   <audio id="tapSound" src="https://www.soundjay.com/buttons/button-22.mp3" preload="auto"></audio>
@@ -204,7 +216,6 @@
     const leftAction = document.getElementById('leftAction');
     const rightAction = document.getElementById('rightAction');
     const instructions = document.getElementById('instructions');
-
     const touchA = document.getElementById('touchA');
     const touchD = document.getElementById('touchD');
 
@@ -212,6 +223,7 @@
     let lastKey = '';
     let gameOver = false;
     let lastTapTime = 0;
+    let startTime = Date.now();
 
     const faces = ["😬", "😠", "😤", "😫", "😵‍💫", "😎", "😌"];
     const messages = [
@@ -222,6 +234,19 @@
       "NYOMJAD!! 💢",
     ];
 
+    const floatingEmojis = ["💪", "😖", "☠️", "🧻", "😤"];
+
+    function showFloatingEmoji(target) {
+      const emoji = document.createElement("div");
+      emoji.className = "floating-emoji";
+      emoji.textContent = floatingEmojis[Math.floor(Math.random() * floatingEmojis.length)];
+      const rect = target.getBoundingClientRect();
+      emoji.style.left = rect.left + rect.width / 2 + "px";
+      emoji.style.top = rect.top + "px";
+      document.body.appendChild(emoji);
+      setTimeout(() => document.body.removeChild(emoji), 1000);
+    }
+
     function updateGame() {
       progress = Math.min(100, progress);
       progressBar.style.width = progress + "%";
@@ -229,8 +254,12 @@
       if (progress >= 100) {
         aron.textContent = "🚽" + faces[6];
       } else if (progress >= 80) {
+        aron.textContent = "🚽" + faces[5];
+      } else if (progress >= 60) {
         aron.textContent = "🚽" + faces[4];
-      } else if (progress >= 50) {
+      } else if (progress >= 40) {
+        aron.textContent = "🚽" + faces[3];
+      } else if (progress >= 20) {
         aron.textContent = "🚽" + faces[2];
       } else {
         aron.textContent = "🚽" + faces[0];
@@ -244,8 +273,10 @@
       if (progress >= 100 && !gameOver) {
         gameOver = true;
         poopSound.play();
+        const time = ((Date.now() - startTime) / 1000).toFixed(2);
         message.textContent = '';
-        result.innerHTML = "Áron végre megkönnyebbült! 💩💨";
+        result.innerHTML = `Áron végre megkönnyebbült! 💩💨<br><br>
+                            Idő: <strong>${time}</strong> mp`;
         retryBtn.style.display = 'inline-block';
         document.getElementById('mobileControls').style.display = 'none';
         instructions.style.display = 'none';
@@ -264,6 +295,7 @@
       if (btnElement) {
         btnElement.classList.add('pressed');
         setTimeout(() => btnElement.classList.remove('pressed'), 120);
+        showFloatingEmoji(btnElement);
       }
 
       if (key === 'A') {
