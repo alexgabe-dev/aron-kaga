@@ -148,6 +148,12 @@
         max-width: 120px;
         user-select: none;
         touch-action: manipulation;
+        transition: transform 0.1s ease;
+      }
+
+      .mobile-btn.pressed {
+        transform: scale(0.92);
+        box-shadow: inset 0 3px 6px rgba(0,0,0,0.2);
       }
     }
   </style>
@@ -197,8 +203,10 @@
     const retryBtn = document.getElementById('retryBtn');
     const leftAction = document.getElementById('leftAction');
     const rightAction = document.getElementById('rightAction');
-    const mobileControls = document.getElementById('mobileControls');
     const instructions = document.getElementById('instructions');
+
+    const touchA = document.getElementById('touchA');
+    const touchD = document.getElementById('touchD');
 
     let progress = 0;
     let lastKey = '';
@@ -239,30 +247,31 @@
         message.textContent = '';
         result.innerHTML = "Áron végre megkönnyebbült! 💩💨";
         retryBtn.style.display = 'inline-block';
-        mobileControls.style.display = 'none';
+        document.getElementById('mobileControls').style.display = 'none';
         instructions.style.display = 'none';
       }
     }
 
-    function handlePress(key) {
+    function handlePress(key, btnElement = null) {
       if (gameOver) return;
 
       const now = Date.now();
-      if (now - lastTapTime < 80) return; // Debounce: 80ms
+      if (now - lastTapTime < 80) return;
       lastTapTime = now;
 
-      if (navigator.vibrate) {
-        navigator.vibrate(100);
+      if (navigator.vibrate) navigator.vibrate(100);
+
+      if (btnElement) {
+        btnElement.classList.add('pressed');
+        setTimeout(() => btnElement.classList.remove('pressed'), 120);
       }
 
       if (key === 'A') {
-        const tapClone = tapSound.cloneNode();
-        tapClone.play();
+        tapSound.cloneNode().play();
         leftAction.classList.add('active');
         setTimeout(() => leftAction.classList.remove('active'), 150);
       } else if (key === 'D') {
-        const gruntClone = gruntSound.cloneNode();
-        gruntClone.play();
+        gruntSound.cloneNode().play();
         rightAction.classList.add('active');
         setTimeout(() => rightAction.classList.remove('active'), 150);
       }
@@ -282,19 +291,17 @@
 
     document.addEventListener('keydown', (e) => {
       const key = e.key.toUpperCase();
-      if (key === 'A' || key === 'D') {
-        handlePress(key);
-      }
+      if (key === 'A' || key === 'D') handlePress(key);
     });
 
-    document.getElementById('touchA').addEventListener('touchstart', (e) => {
+    touchA.addEventListener('touchstart', (e) => {
       e.preventDefault();
-      handlePress('A');
+      handlePress('A', touchA);
     });
 
-    document.getElementById('touchD').addEventListener('touchstart', (e) => {
+    touchD.addEventListener('touchstart', (e) => {
       e.preventDefault();
-      handlePress('D');
+      handlePress('D', touchD);
     });
 
     setInterval(() => {
